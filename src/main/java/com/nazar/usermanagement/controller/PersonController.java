@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
-@RestController//обробляє http запити і поверта дані у json or xml
+@RestController
 @RequestMapping("/persons")//path
 public class PersonController {
 
