@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.nazar.usermanagement.service.RoleService;
 
 @RestController
-@RequestMapping("/persons/{personId}/roles")
+@RequestMapping("/users/{userId}/roles")
 public class RoleController {
 	
 	private final RoleService roleService;
@@ -19,8 +19,8 @@ public class RoleController {
 	}
 	
 	@PostMapping
-	public void addRole(@PathVariable Long personId , @RequestBody RoleDTO roleDTO) {
+	public void addRole(@PathVariable Long userId , @RequestBody RoleDTO roleDTO) {
 		//add role by persons id
-		roleService.addRole(personId, roleDTO);
+		roleService.addRole(userId, roleDTO);
 	}
 }

@@ -28,6 +28,7 @@ public class Role {
 	}
 
 	public void setRole(RoleType role) {
+		this.role = role;
 	}
 
 	public enum RoleType {
@@ -47,10 +48,10 @@ public class Role {
 	private RoleType role;
 
 	@OneToMany(mappedBy = "role", cascade = CascadeType.ALL)
-	private Set<Person> persons = new HashSet<>();
+	private Set<User> users = new HashSet<>();
 
-	public void addPerson(Person person) {
-		this.persons.add(person);
-		person.setRole(this);
+	public void addUser(User user) {
+		this.users.add(user);
+		user.setRole(this);
 	}
 }

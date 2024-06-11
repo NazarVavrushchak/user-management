@@ -15,10 +15,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity //say it to do smth with hibernate
-@Table(name = "persons")
+@Table(name = "users")
 @Data
 @NoArgsConstructor
-public class Person {
+public class User {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -46,6 +46,6 @@ public class Person {
 
 	public void addRole(Role role) {
 		this.role = role; // Set the role for this person
-	    role.getPersons().add(this); // Add this person to the set of persons in the role
+	    role.getUsers().add(this); // Add this person to the set of persons in the role
 	}
 }
