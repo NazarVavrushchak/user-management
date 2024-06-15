@@ -44,7 +44,7 @@ public class Role {
 
 	@Setter
     @Enumerated(EnumType.STRING)
-	@Column(nullable = false, unique = true)
+	@Column(nullable = false)
 	private RoleType role;
 
 	@OneToMany(mappedBy = "role", cascade = CascadeType.ALL)

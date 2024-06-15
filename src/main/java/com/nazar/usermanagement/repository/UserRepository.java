@@ -4,6 +4,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.nazar.usermanagement.entity.User;
 
-public interface UserRepository extends JpaRepository<User, Long>{//імплементуємо багато логіки
+import java.util.Optional;
 
+public interface UserRepository extends JpaRepository<User, Long>{
+
+    Optional<User> findByEmail(String email);
 }

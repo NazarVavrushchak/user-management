@@ -45,7 +45,7 @@ public class User {
 	private Role role;
 
 	public void addRole(Role role) {
-		this.role = role; // Set the role for this person
-	    role.getUsers().add(this); // Add this person to the set of persons in the role
+		this.role = role;
+	    role.getUsers().add(this); 
 	}
 }
