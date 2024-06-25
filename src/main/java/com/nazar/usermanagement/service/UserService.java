@@ -9,12 +9,9 @@ import com.nazar.usermanagement.entity.Role;
 import com.nazar.usermanagement.repository.RoleRepository;
 import com.nazar.usermanagement.repository.UserRepository;
 import com.nazar.usermanagement.utils.UserMapper;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import com.nazar.usermanagement.entity.User;
-
 
 @Service
 @Transactional
@@ -34,9 +31,6 @@ public class UserService {
     }
 
     public void createUser(UserDTO userDTO) {
-//        User user = UserMapper.toEntity(userDTO);
-//        userRepository.save(user);
-        //new version because in test appear some issues with dto and entity
         User user = new User();
         user.setFirstName(userDTO.getFirstName());
         user.setLastName(userDTO.getLastName());

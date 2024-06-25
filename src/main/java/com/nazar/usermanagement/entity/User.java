@@ -46,6 +46,6 @@ public class User {
 
 	public void addRole(Role role) {
 		this.role = role;
-	    role.getUsers().add(this); 
+	    role.getUsers().add(this);
 	}
 }

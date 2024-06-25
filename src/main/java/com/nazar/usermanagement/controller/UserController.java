@@ -1,9 +1,8 @@
 package com.nazar.usermanagement.controller;
 
 import com.nazar.usermanagement.DTO.UserDTO;
-import com.nazar.usermanagement.service.UserService;
 import org.springframework.web.bind.annotation.*;
-
+import com.nazar.usermanagement.service.UserService;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,7 +16,7 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PostMapping//позначає метод контролера, який повинен реагувати на POST-запити на вказаний шлях
+    @PostMapping
     public void createUser(@RequestBody UserDTO userDTO) {
         //save user to the db
         userService.createUser(userDTO);

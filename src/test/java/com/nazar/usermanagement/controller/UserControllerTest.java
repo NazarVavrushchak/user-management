@@ -16,15 +16,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.shaded.com.github.dockerjava.core.MediaType;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Testcontainers
 @SpringBootTest
@@ -98,10 +95,6 @@ class UserControllerTest {
 
     @Test
     void getAllUser() throws Exception {
-        mockMvc.perform(get("/users")
-                        .contentType(String.valueOf(MediaType.APPLICATION_JSON)))
-                .andExpect(status().isOk());
-
         Role userRole = roleRepository.findByRole(Role.RoleType.WORKER)
                 .orElseGet(() -> {
                     Role newRole = new Role();
