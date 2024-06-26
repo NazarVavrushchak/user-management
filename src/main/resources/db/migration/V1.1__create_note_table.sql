@@ -1,0 +1,6 @@
+CREATE TABLE notes(
+id BIGSERIAL PRIMARY KEY,
+title TEXT NOT NULL,
+body TEXT,
+user_id BIGINT REFERENCES users(id)
+);
