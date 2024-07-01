@@ -4,54 +4,48 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.nazar.usermanagement.DTO.RoleDTO;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Entity //say it to do smth with hibernate
+@Entity
 @Table(name = "roles")
 @Data
 @NoArgsConstructor
 public class Role {
-	public void setRole(RoleDTO.RoleType role) {
-		this.role = RoleType.valueOf(role.name());
-	}
+    public void setRole(RoleDTO.RoleType role) {
+        this.role = RoleType.valueOf(role.name());
+    }
 
-	public void setRole(RoleType role) {
-		this.role = role;
-	}
+    public void setRole(RoleType role) {
+        this.role = role;
+    }
 
-	public enum RoleType {
-		STUDENT,
-		WORKER,
-		RETIRED,
-		PUPIL,
-	}
+    public enum RoleType {
+        STUDENT,
+        WORKER,
+        RETIRED,
+        PUPIL,
+        USER //default
+    }
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long roleId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long roleId;
 
-	@Setter
     @Enumerated(EnumType.STRING)
-	@Column(nullable = false)
-	private RoleType role;
+    @Column(nullable = false)
+    private RoleType role;
 
-	@OneToMany(mappedBy = "role", cascade = CascadeType.ALL)
-	private Set<User> users = new HashSet<>();
+    @OneToMany(mappedBy = "role", cascade = CascadeType.ALL)
+    private Set<User> users = new HashSet<>();
 
-	public void addUser(User user) {
-		this.users.add(user);
-		user.setRole(this);
-	}
+    @ManyToMany(mappedBy = "roles")
+    private Set<Group> groups = new HashSet<>();
+
+    public void addUser(User user) {
+        this.users.add(user);
+        user.setRole(this);
+    }
 }

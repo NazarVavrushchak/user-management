@@ -92,6 +92,16 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-config</artifactId>
+        </dependency>
+
         <!-- JUnit Jupiter Dependency -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -106,9 +116,8 @@
             <artifactId>spring-boot-testcontainers</artifactId>
             <scope>test</scope>
         </dependency>
+
     </dependencies>
-
-
     <build>
         <plugins>
             <!-- Spring Boot Maven Plugin -->
