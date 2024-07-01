@@ -4,8 +4,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.nazar.usermanagement.entity.Role;
 
+import java.util.Optional;
 
-//TODO add two more implementation using JDBC and HIBERNATE
 public interface RoleRepository extends JpaRepository<Role, Long> {
-
+    Optional<Role> findByRole(Role.RoleType role);
 }

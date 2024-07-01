@@ -1,0 +1,32 @@
+commit 0e3f0ad1c80416cd43488a49cd299912924999e5 (HEAD -> feat/jdbc-repo, origin/feat/jdbc-repo)
+Author: Nazar Vavrushchak <nazikvaver@gmail.com>
+Date:   Tue Jun 11 18:47:33 2024 +0300
+
+    feat: add Jdbc , Hibernate and fix naming
+
+commit a3e7987324e9096de6963359c6ee7ab1db956740 (origin/master, origin/HEAD, master)
+Merge: 51cc10a d251fa3
+Author: NazarVavrushchak <144215002+NazarVavrushchak@users.noreply.github.com>
+Date:   Sun Jun 9 22:27:48 2024 +0300
+
+    Merge pull request #1 from NazarVavrushchak/feat/resolve-todos
+    
+    feat: initialize the project and resolve todos
+
+commit d251fa37d336320e81ab35576904c56568a8ad14 (origin/feat/resolve-todos, feat/resolve-todos)
+Author: Nazar Vavrushchak <nazikvaver@gmail.com>
+Date:   Sun Jun 9 22:23:42 2024 +0300
+
+    chore: remove comment
+
+commit c02f553c48904e736ccf493a7c39e7ed14729795
+Author: Nazar Vavrushchak <nazikvaver@gmail.com>
+Date:   Sun Jun 9 22:10:25 2024 +0300
+
+    feat: initialize the project and resolve todos
+
+commit 51cc10a090a30e29fcb131c8ced4d2a5de8c94bf
+Author: NazarVavrushchak <144215002+NazarVavrushchak@users.noreply.github.com>
+Date:   Sun Jun 9 21:45:05 2024 +0300
+
+    Initial commit
