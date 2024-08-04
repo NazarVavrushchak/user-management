@@ -1,27 +1,37 @@
 package com.nazar.usermanagement.controller;
 
-import com.nazar.usermanagement.DTO.UserDTO;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nazar.usermanagement.DTO.UserLoginDTO;
+import com.nazar.usermanagement.DTO.UserRegistrationDTO;
 import com.nazar.usermanagement.entity.Role;
 import com.nazar.usermanagement.entity.User;
 import com.nazar.usermanagement.repository.RoleRepository;
 import com.nazar.usermanagement.repository.UserRepository;
-import com.nazar.usermanagement.service.UserService;
-import org.junit.jupiter.api.BeforeEach;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.core.env.Environment;
+import org.springframework.http.MediaType;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Testcontainers
 @SpringBootTest
@@ -29,25 +39,91 @@ import static org.junit.jupiter.api.Assertions.*;
 class UserControllerTest {
 
     @Container
-    public static PostgreSQLContainer<?> postgresDB = new PostgreSQLContainer<>("postgres:16.2");
+    @ServiceConnection
+    static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:16.3");
+
+    @DynamicPropertySource
+    static void postgreSqlProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", postgreSQLContainer::getJdbcUrl);
+        registry.add("spring.datasource.username", postgreSQLContainer::getUsername);
+        registry.add("spring.datasource.password", postgreSQLContainer::getPassword);
+        registry.add("spring.datasource.driver-class-name", postgreSQLContainer::getDriverClassName);
+    }
 
     @Autowired
     private MockMvc mockMvc;
 
     @Autowired
-    UserRepository userRepository;
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    private Environment environment;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     RoleRepository roleRepository;
 
-    @Autowired
-    private UserService userService;
+    private void createUserInDb(String firstName, String lastName, String email, String password, int age) {
+        Role role = roleRepository.findByName("USER").orElseGet(() -> {
+            Role newRole = new Role();
+            newRole.setRole(Role.RoleType.USER);
+            newRole.setName("USER");
+            return roleRepository.save(newRole);
+        });
 
-    @BeforeEach
-    @Transactional
-    public void clearTable() {
-        userRepository.deleteAll();
-        roleRepository.deleteAll();
+        User user = new User();
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
+        user.setEmail(email);
+        user.setPassword(new BCryptPasswordEncoder().encode(password));
+        user.setAge(age);
+        user.setRole(role);
+        userRepository.save(user);
+    }
+
+    @Test
+    @SneakyThrows
+    void registerUser() {
+        assertEquals("org.postgresql.Driver", environment.getProperty("spring.datasource.driver-class-name"));
+
+        UserRegistrationDTO userRegistrationDTO = new UserRegistrationDTO();
+        userRegistrationDTO.setFirstName("Mykola");
+        userRegistrationDTO.setLastName("Subur");
+        userRegistrationDTO.setEmail("mykola@gmail.com");
+        userRegistrationDTO.setPassword("qwerty");
+        userRegistrationDTO.setAge(18);
+
+        String registrationDtoToJson = objectMapper.writeValueAsString(userRegistrationDTO);
+
+        mockMvc.perform(post("/users/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(registrationDtoToJson))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.firstName").value("Mykola"))
+                .andExpect(jsonPath("$.lastName").value("Subur"))
+                .andExpect(jsonPath("$.email").value("mykola@gmail.com"))
+                .andExpect(jsonPath("$.age").value(18));
+    }
+
+    @Test
+    @SneakyThrows
+    void loginUser() {
+        assertEquals("org.postgresql.Driver", environment.getProperty("spring.datasource.driver-class-name"));
+
+        createUserInDb("Mykola", "Subur", "mykola@gmail.com", "qwerty1111", 18);
+
+        UserLoginDTO userLoginDTO = new UserLoginDTO();
+        userLoginDTO.setEmail("mykola@gmail.com");
+        userLoginDTO.setPassword("qwerty");
+
+        String loginDtoToJson = objectMapper.writeValueAsString(userLoginDTO);
+
+        mockMvc.perform(post("/users/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(loginDtoToJson))
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -67,9 +143,12 @@ class UserControllerTest {
 
         userRepository.save(user);
 
-        Optional<UserDTO> result = userService.getUser(user.getId());
-        assertTrue(result.isPresent());
-        assertEquals("Nazar", result.get().getFirstName());
+        mockMvc.perform(post("/users/get")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"id\": " + user.getId() + "}")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.firstName").value("Nazar"));
     }
 
     @Test
@@ -78,19 +157,18 @@ class UserControllerTest {
         userRole.setRole(Role.RoleType.STUDENT);
         roleRepository.save(userRole);
 
-        UserDTO userDTO = new UserDTO();
-        userDTO.setFirstName("Nazar");
-        userDTO.setLastName("Vavrushchak");
-        userDTO.setEmail("test@gmail.com");
-        userDTO.setAge(18);
-        userDTO.setRoleId(userRole.getRoleId());
+        String userDtoJson = "{ \"firstName\": \"Nazar\", \"lastName\": \"Vavrushchak\", \"email\": \"test@gmail.com\", \"age\": 18, \"roleId\": " + userRole.getRoleId() + " }";
 
-        userService.createUser(userDTO);
+        mockMvc.perform(post("/users/create")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(userDtoJson)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.firstName").value("Nazar"));
 
         List<User> userList = userRepository.findAll();
         assertFalse(userList.isEmpty());
         assertEquals("Nazar", userList.get(0).getFirstName());
-
     }
 
     @Test
@@ -117,12 +195,17 @@ class UserControllerTest {
         user1.setAge(25);
         user1.setRole(userRole);
         userRepository.save(user1);
-        List<User> userList = Arrays.asList(user, user1);
 
-        assertFalse(userList.isEmpty());
+        mockMvc.perform(post("/users/all")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].firstName").value("Nazar"))
+                .andExpect(jsonPath("$[1].firstName").value("Volodymyr"));
     }
 
     @Test
+    @SneakyThrows
     void updateUser() {
         Role userRole = new Role();
         userRole.setRole(Role.RoleType.STUDENT);
@@ -136,20 +219,16 @@ class UserControllerTest {
         user.setRole(userRole);
         userRepository.save(user);
 
-        UserDTO updatedUserDTO = new UserDTO();
-        updatedUserDTO.setFirstName("UpdatedFirstName");
-        updatedUserDTO.setLastName("UpdatedLastName");
-        updatedUserDTO.setEmail("updated.email@gmail.com");
-        updatedUserDTO.setAge(20);
-        updatedUserDTO.setRoleId(userRole.getRoleId());
+        String updatedUserDtoJson = "{ \"firstName\": \"UpdatedFirstName\", \"lastName\": \"UpdatedLastName\", \"email\": \"updated.email@gmail.com\", \"age\": 20, \"roleId\": " + userRole.getRoleId() + " }";
 
-        Optional<UserDTO> updatedUser = userService.updateUser(user.getId(), updatedUserDTO);
-
-        assertTrue(updatedUser.isPresent());
-        assertEquals("UpdatedFirstName", updatedUser.get().getFirstName());
-        assertEquals("UpdatedLastName", updatedUser.get().getLastName());
-        assertEquals("updated.email@gmail.com", updatedUser.get().getEmail());
-        assertEquals(20, updatedUser.get().getAge());
+        mockMvc.perform(post("/users/update")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(updatedUserDtoJson)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.firstName").value("UpdatedFirstName"))
+                .andExpect(jsonPath("$.lastName").value("UpdatedLastName"))
+                .andExpect(jsonPath("$.email").value("updated.email@gmail.com"));
 
         Optional<User> updatedUserFromDb = userRepository.findById(user.getId());
         assertTrue(updatedUserFromDb.isPresent());

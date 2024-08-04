@@ -31,17 +31,16 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public Role defaultRole(){
-        return roleRepository.findByRole(Role.RoleType.USER)
-                .orElseGet(() -> {
-                    Role newRole = new Role();
-                    newRole.setRole(Role.RoleType.USER);
-                    return roleRepository.save(newRole);
-                });
+    public Role defaultRole() {
+        return roleRepository.findByRole(Role.RoleType.USER).orElseGet(() -> {
+            Role newRole = new Role();
+            newRole.setRole(Role.RoleType.USER);
+            return roleRepository.save(newRole);
+        });
     }
 
     public User registerUser(UserRegistrationDTO userRegistrationDTO) {
-        if (userRepository.findByEmail(userRegistrationDTO.getEmail()).isPresent()){
+        if (userRepository.findByEmail(userRegistrationDTO.getEmail()).isPresent()) {
             throw new IllegalStateException("User with this email is already exists");
         }
 
@@ -50,14 +49,15 @@ public class UserService {
         user.setLastName(userRegistrationDTO.getLastName());
         user.setEmail(userRegistrationDTO.getEmail());
         user.setPassword(passwordEncoder.encode(userRegistrationDTO.getPassword()));
+        user.setAge(userRegistrationDTO.getAge());
         Role role = defaultRole();
         user.setRole(role);
         return userRepository.save(user);
+
     }
 
     public User authenticateUser(UserLoginDTO userLoginDTO) throws Exception {
-        User user = userRepository.findByEmail(userLoginDTO.getEmail())
-                .orElseThrow(() -> new Exception("User not found"));
+        User user = userRepository.findByEmail(userLoginDTO.getEmail()).orElseThrow(() -> new Exception("User not found"));
         if (!passwordEncoder.matches(userLoginDTO.getPassword(), user.getPassword())) {
             throw new Exception("Invalid credentials");
         }
@@ -76,8 +76,7 @@ public class UserService {
         user.setEmail(userDTO.getEmail());
         user.setAge(userDTO.getAge());
 
-        Role role = roleRepository.findById(userDTO.getRoleId())
-                .orElseThrow(() -> new RuntimeException("Role not found"));
+        Role role = roleRepository.findById(userDTO.getRoleId()).orElseThrow(() -> new RuntimeException("Role not found"));
         user.setRole(role);
 
         userRepository.save(user);
@@ -89,8 +88,7 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public List<UserDTO> getAllUsers() {
-        return userRepository.findAll().stream()
-                .map(UserMapper::toDTO).collect(Collectors.toList());
+        return userRepository.findAll().stream().map(UserMapper::toDTO).collect(Collectors.toList());
     }
 
     public Optional<UserDTO> updateUser(Long id, UserDTO userDTO) {
@@ -102,5 +100,11 @@ public class UserService {
             userRepository.save(user);
             return UserMapper.toDTO(user);
         });
+    }
+
+    public void updateFcmToken(Long userId, String fcmToken) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
+        user.setFcmToken(fcmToken);
+        userRepository.save(user);
     }
 }

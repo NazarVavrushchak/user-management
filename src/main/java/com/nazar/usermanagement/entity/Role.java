@@ -27,7 +27,8 @@ public class Role {
         WORKER,
         RETIRED,
         PUPIL,
-        USER //default
+        USER ,//default
+        CUSTOM
     }
 
     @Id
@@ -38,6 +39,11 @@ public class Role {
     @Column(nullable = false)
     private RoleType role;
 
+    private String name;
+
+    @Setter
+    private String customRole;
+
     @OneToMany(mappedBy = "role", cascade = CascadeType.ALL)
     private Set<User> users = new HashSet<>();
 
@@ -47,5 +53,15 @@ public class Role {
     public void addUser(User user) {
         this.users.add(user);
         user.setRole(this);
+    }
+
+    @OneToMany(mappedBy = "role", cascade = CascadeType.ALL)
+    private Set<GroupRole> groupRoles = new HashSet<>();
+
+    public String getRoleName() {
+        if (role == RoleType.CUSTOM) {
+            return customRole;
+        }
+        return role.name();
     }
 }

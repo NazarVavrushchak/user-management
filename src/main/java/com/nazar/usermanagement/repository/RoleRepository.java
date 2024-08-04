@@ -8,4 +8,7 @@ import java.util.Optional;
 
 public interface RoleRepository extends JpaRepository<Role, Long> {
     Optional<Role> findByRole(Role.RoleType role);
+    Optional<Role> findByCustomRole(String customRole);
+
+    Optional<Role> findByName(String groupRoleName);
 }

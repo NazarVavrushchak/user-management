@@ -1,18 +1,15 @@
 package com.nazar.usermanagement.service;
 
 import com.nazar.usermanagement.entity.Group;
+import com.nazar.usermanagement.entity.GroupRole;
 import com.nazar.usermanagement.entity.Role;
 import com.nazar.usermanagement.entity.User;
-import com.nazar.usermanagement.repository.GroupRepository;
-import com.nazar.usermanagement.repository.RoleRepository;
-import com.nazar.usermanagement.repository.UserRepository;
+import com.nazar.usermanagement.repository.*;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,10 +21,14 @@ public class GroupService {
 
     private final UserRepository userRepository;
 
-    public GroupService(GroupRepository groupRepository, RoleRepository roleRepository, UserRepository userRepository) {
+    private final GroupRoleRepository groupRoleRepository;
+
+    public GroupService(GroupRepository groupRepository, RoleRepository roleRepository
+            , UserRepository userRepository, GroupRoleRepository groupRoleRepository) {
         this.groupRepository = groupRepository;
         this.roleRepository = roleRepository;
         this.userRepository = userRepository;
+        this.groupRoleRepository = groupRoleRepository;
     }
 
     public Group createGroup(String name) {
@@ -50,16 +51,30 @@ public class GroupService {
         return group;
     }
 
-    public Group addRoleToGroup(Long groupId, Long roleId) {
-        Group group = groupRepository.findById(groupId)
+    public GroupRole addRoleToGroup(Long groupId, Long userId , String groupRoleName) {
+        if (!groupRoleName.matches("^[a-zA-Z0-9]{3,}$")) {
+            throw new ConstraintViolationException("Group role name must be at least 3 characters long and contain only letters.", null);
+        }
+        var group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new IllegalArgumentException("Group not found"));
-        Role role = roleRepository.findById(roleId)
-                .orElseThrow(() -> new IllegalArgumentException("Role not found"));
 
-        group.getRoles().add(role);
-        role.getGroups().add(group);
+        var user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        return group;
+        Role role = roleRepository.findByName(groupRoleName)
+                .orElseGet(() -> {
+                    Role newRole = new Role();
+                    newRole.setName(groupRoleName);
+                    return roleRepository.save(newRole);
+                });
+
+        GroupRole groupRole = new GroupRole();
+        groupRole.setGroup(group);
+        groupRole.setUser(user);
+        groupRole.setRole(role);
+        groupRole.setGroupRole(groupRoleName);
+
+        return groupRoleRepository.save(groupRole);
     }
 
     public List<Group> getGroupsByRole(Role.RoleType roleType) {
