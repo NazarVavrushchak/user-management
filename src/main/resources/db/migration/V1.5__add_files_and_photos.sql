@@ -1,0 +1,5 @@
+ALTER TABLE notes
+ADD COLUMN photo BYTEA,
+ADD COLUMN file_context BYTEA,
+ADD COLUMN file_name TEXT,
+ADD COLUMN file_type TEXT;

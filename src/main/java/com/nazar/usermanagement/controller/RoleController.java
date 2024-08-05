@@ -1,26 +1,44 @@
 package com.nazar.usermanagement.controller;
 
 import com.nazar.usermanagement.DTO.RoleDTO;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.nazar.usermanagement.entity.Role;
+import org.springframework.web.bind.annotation.*;
 import com.nazar.usermanagement.service.RoleService;
 
+import java.util.Optional;
+
 @RestController
-@RequestMapping("/persons/{personId}/roles")
+@RequestMapping("/users/{userId}/roles")
 public class RoleController {
-	
-	private final RoleService roleService;
-	
-	public RoleController(RoleService roleService) {
-		this.roleService = roleService;
-	}
-	
-	@PostMapping
-	public void addRole(@PathVariable Long personId , @RequestBody RoleDTO roleDTO) {
-		//add role by persons id
-		roleService.addRole(personId, roleDTO);
-	}
+
+    private final RoleService roleService;
+
+    public RoleController(RoleService roleService) {
+        this.roleService = roleService;
+    }
+
+    @PostMapping
+    public void addRole(@PathVariable Long userId, @RequestBody RoleDTO roleDTO) {
+        roleService.addRole(userId, roleDTO);
+    }
+
+    @PostMapping("/custom")
+    public void createCustomRole(@PathVariable Long userId, @RequestParam String customRole) {
+        roleService.createCustomRole(userId, customRole);
+    }
+
+    @GetMapping("/{roleId}")
+    public Optional<Role> getRole(@PathVariable Long roleId) {
+        return roleService.getRole(roleId);
+    }
+
+    @DeleteMapping("/{roleId}")
+    public void deleteRole(@PathVariable Long roleId){
+        roleService.deleteRole(roleId);
+    }
+
+    @PutMapping("/{roleId}")
+    public void updateRole(@PathVariable Long roleId , @RequestBody RoleDTO roleDTO){
+        roleService.updateRole(roleId, roleDTO);
+    }
 }

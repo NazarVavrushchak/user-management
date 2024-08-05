@@ -1,0 +1,2 @@
+ALTER TABLE roles
+ADD COLUMN custom_role VARCHAR(20)

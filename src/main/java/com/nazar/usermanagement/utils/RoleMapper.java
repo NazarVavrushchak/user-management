@@ -17,4 +17,12 @@ public class RoleMapper {
         role.setRoleId(roleDTO.getRoleId());
         return role;
     }
+    private static RoleDTO.RoleType toRoleTypeDTO(Role.RoleType roleType) {
+        return RoleDTO.RoleType.valueOf(roleType.name());
+    }
+
+    private static Role.RoleType toRoleTypeEntity(RoleDTO.RoleType roleType) {
+        return Role.RoleType.valueOf(roleType.name());
+    }
+
 }

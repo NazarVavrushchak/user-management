@@ -1,0 +1,9 @@
+CREATE TABLE group_roles(
+id BIGSERIAL PRIMARY KEY,
+role_id BIGSERIAL NOT NULL,
+group_id BIGSERIAL NOT NULL,
+user_id BIGSERIAL NOT NULL,
+CONSTRAINT fk_role FOREIGN KEY (role_id) REFERENCES roles(role_id),
+CONSTRAINT fk_group FOREIGN KEY (group_id) REFERENCES groups(id),
+CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id)
+);
